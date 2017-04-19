@@ -44,7 +44,6 @@ public class VideoCallingRoomPresenter implements VideoCallingRoomContract.Prese
                     @Override
                     public void handleViewOnRequestSuccess(TokenServer data) {
                         view.onListenerRequestVideoToken(true, "Connected Successfully", data);
-
                     }
 
                     @Override

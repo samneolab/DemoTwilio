@@ -19,10 +19,6 @@ public class SharedPreferencesManager {
 
     private boolean mBulkUpdate = false;
 
-    public enum Key {
-        ROOM_NUMBER,
-        USER_NAME
-    }
 
     private SharedPreferencesManager(Context context) {
         mPref = context.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);

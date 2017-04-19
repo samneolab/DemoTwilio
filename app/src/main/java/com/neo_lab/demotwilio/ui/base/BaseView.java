@@ -12,4 +12,6 @@ public interface BaseView {
 
     BaseActivity getActivity();
 
+    void showUI();
+
 }

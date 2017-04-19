@@ -14,8 +14,6 @@ public interface VideoCallingRoomContract {
 
         void getLocalProperties();
 
-        void showUI();
-
         boolean isPermissionsGranted();
 
         void requestPermissions();

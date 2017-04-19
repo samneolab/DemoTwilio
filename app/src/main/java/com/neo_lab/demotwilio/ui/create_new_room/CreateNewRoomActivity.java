@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.neo_lab.demotwilio.R;
+import com.neo_lab.demotwilio.share_preferences_manager.Key;
 import com.neo_lab.demotwilio.share_preferences_manager.SharedPreferencesManager;
 import com.neo_lab.demotwilio.ui.base.BaseActivity;
 import com.neo_lab.demotwilio.ui.video_calling_room.VideoCallingRoomActivity;
@@ -110,7 +111,7 @@ public class CreateNewRoomActivity extends BaseActivity implements CreateNewRoom
     }
 
     @Override
-    public void storeLocalData(SharedPreferencesManager.Key key, String value) {
+    public void storeLocalData(Key key, String value) {
         SharedPreferencesManager.getInstance(CreateNewRoomActivity.this).put(key, value);
     }
 
@@ -135,7 +136,7 @@ public class CreateNewRoomActivity extends BaseActivity implements CreateNewRoom
 
                             dialog.getActionButton(DialogAction.POSITIVE).setEnabled(true);
 
-                            storeLocalData(SharedPreferencesManager.Key.USER_NAME, input.toString());
+                            storeLocalData(Key.USER_NAME, input.toString());
 
                         }
 
@@ -180,7 +181,7 @@ public class CreateNewRoomActivity extends BaseActivity implements CreateNewRoom
     public void onButtonOkClick() {
 
         if (validateInputsForRoomExisted()) {
-            storeLocalData(SharedPreferencesManager.Key.ROOM_NUMBER, edRoomExisted.getText().toString());
+            storeLocalData(Key.ROOM_NUMBER, edRoomExisted.getText().toString());
             showDialogToEnterUserName();
         }
 
@@ -189,7 +190,7 @@ public class CreateNewRoomActivity extends BaseActivity implements CreateNewRoom
     @OnClick(R.id.im_connect_to_room)
     public void onImageViewConnectToRoomClick() {
 
-        storeLocalData(SharedPreferencesManager.Key.ROOM_NUMBER, tvCustomerNameRoom.getText().toString());
+        storeLocalData(Key.ROOM_NUMBER, tvCustomerNameRoom.getText().toString());
         showDialogToEnterUserName();
 
     }

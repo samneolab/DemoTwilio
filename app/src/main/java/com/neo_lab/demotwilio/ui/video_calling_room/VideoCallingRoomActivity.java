@@ -22,6 +22,7 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.neo_lab.demotwilio.R;
 import com.neo_lab.demotwilio.model.Token;
+import com.neo_lab.demotwilio.share_preferences_manager.Key;
 import com.neo_lab.demotwilio.share_preferences_manager.SharedPreferencesManager;
 import com.neo_lab.demotwilio.ui.base.BaseActivity;
 import com.neo_lab.demotwilio.ui.common.Dialog;
@@ -204,9 +205,9 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         // Get Device Id
         deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
         userName = SharedPreferencesManager.getInstance(VideoCallingRoomActivity.this).
-                getString(SharedPreferencesManager.Key.USER_NAME);
+                getString(Key.USER_NAME);
         roomNumber = SharedPreferencesManager.getInstance(VideoCallingRoomActivity.this).
-                getString(SharedPreferencesManager.Key.ROOM_NUMBER);
+                getString(Key.ROOM_NUMBER);
 
     }
 
