@@ -14,10 +14,6 @@ public interface VideoCallingRoomContract {
 
         void getLocalProperties();
 
-        boolean isPermissionsGranted();
-
-        void requestPermissions();
-
         void initializeCallingVideoRoom();
 
         void onListenerRequestVideoToken(boolean status, String message, Token token);

@@ -49,8 +49,6 @@ import butterknife.ButterKnife;
 
 public class VideoCallingRoomActivity extends BaseActivity implements VideoCallingRoomContract.View {
 
-    private static final int CAMERA_MIC_PERMISSION_REQUEST_CODE = 1;
-
     private static final String TAG = "VideoCallingRoomActivity";
 
     private VideoCallingRoomContract.Presenter presenter;
@@ -127,21 +125,23 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        if (requestCode == CAMERA_MIC_PERMISSION_REQUEST_CODE) {
-            boolean cameraAndMicPermissionGranted = true;
 
-            for (int grantResult : grantResults) {
-                cameraAndMicPermissionGranted &= grantResult == PackageManager.PERMISSION_GRANTED;
-            }
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_CODE:
 
-            if (cameraAndMicPermissionGranted) {
-                createLocalMedia();
-                presenter.requestTokenCallingVideo(deviceId, userName);
-            } else {
-                Toast.makeText(this,
-                        R.string.permissions_needed,
-                        Toast.LENGTH_LONG).show();
-            }
+                if (checkRequestPermissionsResult(grantResults)) {
+                    createLocalMedia();
+                    presenter.requestTokenCallingVideo(deviceId, userName);
+                } else {
+                    Toast.makeText(this,
+                            R.string.permissions_needed,
+                            Toast.LENGTH_LONG).show();
+                }
+
+                break;
+
+            default:
+                break;
         }
     }
 
@@ -216,38 +216,6 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
     }
 
-    @Override
-    public boolean isPermissionsGranted() {
-        int resultCamera = ContextCompat.checkSelfPermission(
-                VideoCallingRoomActivity.this,
-                Manifest.permission.CAMERA);
-
-        int resultMic = ContextCompat.checkSelfPermission(
-                VideoCallingRoomActivity.this,
-                Manifest.permission.RECORD_AUDIO);
-
-        return  resultCamera == PackageManager.PERMISSION_GRANTED &&
-                resultMic == PackageManager.PERMISSION_GRANTED;
-    }
-
-    @Override
-    public void requestPermissions() {
-
-        if (ActivityCompat.shouldShowRequestPermissionRationale(VideoCallingRoomActivity.this, Manifest.permission.CAMERA) ||
-                ActivityCompat.shouldShowRequestPermissionRationale(VideoCallingRoomActivity.this, Manifest.permission.RECORD_AUDIO) ||
-                ActivityCompat.shouldShowRequestPermissionRationale(VideoCallingRoomActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-
-            Toast.makeText(VideoCallingRoomActivity.this, R.string.permissions_needed, Toast.LENGTH_LONG).show();
-
-        } else {
-
-            requestPermissions(new String[] {
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.RECORD_AUDIO
-            }, CAMERA_MIC_PERMISSION_REQUEST_CODE);
-        }
-
-    }
 
     @Override
     public void initializeCallingVideoRoom() {
@@ -265,8 +233,11 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         /*
          * Check camera and microphone permissions. Needed in Android M.
          */
-        if (!isPermissionsGranted()) {
-            requestPermissions();
+
+        String[] permissions = { Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO };
+
+        if (!isSpecificPermissionsGranted(permissions)) {
+            requestSpecificPermissions(permissions, R.string.permissions_needed);
         } else {
             createLocalMedia();
             presenter.requestTokenCallingVideo(deviceId, userName);
