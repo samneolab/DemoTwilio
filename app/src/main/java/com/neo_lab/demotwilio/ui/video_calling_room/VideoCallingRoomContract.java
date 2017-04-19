@@ -3,6 +3,8 @@ package com.neo_lab.demotwilio.ui.video_calling_room;
 import com.neo_lab.demotwilio.model.Token;
 import com.neo_lab.demotwilio.ui.base.BasePresenter;
 import com.neo_lab.demotwilio.ui.base.BaseView;
+import com.neo_lab.demotwilio.ui.base_mvp.BaseMvpPresenter;
+import com.neo_lab.demotwilio.ui.base_mvp.BaseMvpView;
 
 /**
  * Created by sam_nguyen on 18/04/2017.
@@ -10,7 +12,7 @@ import com.neo_lab.demotwilio.ui.base.BaseView;
 
 public interface VideoCallingRoomContract {
 
-    interface View extends BaseView<Presenter> {
+    interface View extends BaseMvpView {
 
         void getLocalProperties();
 
@@ -28,8 +30,7 @@ public interface VideoCallingRoomContract {
 
     }
 
-
-    interface Presenter extends BasePresenter {
+    interface Presenter extends BaseMvpPresenter<View> {
 
         void requestTokenCallingVideo(String deviceId, String userName);
 

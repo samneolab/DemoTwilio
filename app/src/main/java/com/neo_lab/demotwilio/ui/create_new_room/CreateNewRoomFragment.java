@@ -21,7 +21,6 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.neo_lab.demotwilio.R;
 import com.neo_lab.demotwilio.share_preferences_manager.SharedPreferencesManager;
-import com.neo_lab.demotwilio.ui.main.MainActivity;
 import com.neo_lab.demotwilio.ui.video_calling_room.VideoCallingRoomActivity;
 import com.neo_lab.demotwilio.utils.activity.ActivityUtils;
 

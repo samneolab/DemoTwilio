@@ -1,4 +1,4 @@
-package com.neo_lab.demotwilio.ui.main;
+package com.neo_lab.demotwilio.ui.video_calling_room;
 
 import android.content.Context;
 import android.content.DialogInterface;

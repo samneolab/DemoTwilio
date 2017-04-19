@@ -20,23 +20,17 @@ public class VideoCallingRoomPresenter implements VideoCallingRoomContract.Prese
 
     private static final String TAG = VideoCallingRoomPresenter.class.getName();
 
-    private final VideoCallingRoomContract.View view;
+    private VideoCallingRoomContract.View view;
 
     private TokenService service;
 
     private CompositeSubscription subscriptions;
 
-    public VideoCallingRoomPresenter(VideoCallingRoomContract.View view) {
-        this.view = view;
-        this.view.setPresenter(this);
+    public VideoCallingRoomPresenter() {
         this.service = ServiceGenerator.createService(TokenService.class);
         this.subscriptions = new CompositeSubscription();
     }
 
-    @Override
-    public void start() {
-
-    }
 
     @Override
     public void requestTokenCallingVideo(String deviceId, String userName) {
@@ -66,5 +60,15 @@ public class VideoCallingRoomPresenter implements VideoCallingRoomContract.Prese
                 })
         );
 
+    }
+
+    @Override
+    public void attachView(VideoCallingRoomContract.View view) {
+        this.view = view;
+    }
+
+    @Override
+    public void detachView() {
+        this.subscriptions.clear();
     }
 }

@@ -5,12 +5,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
-import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -26,7 +23,6 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.neo_lab.demotwilio.R;
 import com.neo_lab.demotwilio.model.Token;
 import com.neo_lab.demotwilio.share_preferences_manager.SharedPreferencesManager;
-import com.neo_lab.demotwilio.ui.main.Dialog;
 import com.twilio.video.AudioTrack;
 import com.twilio.video.CameraCapturer;
 import com.twilio.video.ConnectOptions;
@@ -110,10 +106,11 @@ public class VideoCallingRoomActivity extends AppCompatActivity implements Video
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_video_calling_room);
-
         // Initialize Presenter
-        presenter = new VideoCallingRoomPresenter(this);
+        presenter = new VideoCallingRoomPresenter();
+        presenter.attachView(this);
+
+        setContentView(R.layout.activity_video_calling_room);
 
         ButterKnife.bind(this);
 
@@ -192,13 +189,12 @@ public class VideoCallingRoomActivity extends AppCompatActivity implements Video
             localMedia = null;
         }
 
+        presenter.detachView();
+
         super.onDestroy();
     }
 
-    @Override
-    public void setPresenter(VideoCallingRoomContract.Presenter presenter) {
 
-    }
 
     @Override
     public void getLocalProperties() {
@@ -692,5 +688,10 @@ public class VideoCallingRoomActivity extends AppCompatActivity implements Video
         }
 
 
+    }
+
+    @Override
+    public Context getContext() {
+        return VideoCallingRoomActivity.this;
     }
 }
