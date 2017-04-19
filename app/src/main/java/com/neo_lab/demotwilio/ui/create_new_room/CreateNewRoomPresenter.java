@@ -14,20 +14,26 @@ public class CreateNewRoomPresenter implements CreateNewRoomContract.Presenter {
 
     private static final String TAG = CreateNewRoomPresenter.class.getName();
 
-    private final CreateNewRoomContract.View view;
+    private CreateNewRoomContract.View view;
 
-    public CreateNewRoomPresenter(CreateNewRoomContract.View view) {
-        this.view = view;
-        this.view.setPresenter(this);
-    }
-
-    @Override
-    public void start() {
+    public CreateNewRoomPresenter() {
 
     }
 
     @Override
     public String generateRoomNumber() {
         return GenerateUtils.getRandomString(SIZE_OF_GENERATE_ROOM_NUMBER);
+    }
+
+    @Override
+    public void attachView(CreateNewRoomContract.View view) {
+
+        this.view = view;
+
+    }
+
+    @Override
+    public void detachView() {
+
     }
 }

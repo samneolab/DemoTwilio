@@ -40,10 +40,9 @@ public class VideoCallingRoomPresenter implements VideoCallingRoomContract.Prese
 
         subscriptions.add(observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new BaseSubscriber<TokenServer>() {
+                .subscribe(new BaseSubscriber<TokenServer>(view.getActivity()) {
                     @Override
                     public void handleViewOnRequestSuccess(TokenServer data) {
-
                         view.onListenerRequestVideoToken(true, "Connected Successfully", data);
 
                     }

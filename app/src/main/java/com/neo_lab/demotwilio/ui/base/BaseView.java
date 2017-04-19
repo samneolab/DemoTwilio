@@ -1,9 +1,15 @@
 package com.neo_lab.demotwilio.ui.base;
 
+import android.app.Activity;
+import android.content.Context;
+import android.support.v7.app.AppCompatActivity;
+
 /**
- * Created by sam_nguyen on 10/04/2017.
+ * Created by sam_nguyen on 19/04/2017.
  */
 
-public interface BaseView<T> {
-    void setPresenter(T presenter);
+public interface BaseView {
+
+    BaseActivity getActivity();
+
 }

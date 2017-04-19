@@ -6,6 +6,12 @@
 
     <string name="error_general_input_empty">Please fill here</string>
 
+    <string name="error_internet_unavailable">Internet Not Available</string>
+
+    <string name="error_connection_time_out">Time Out</string>
+
+    <string name="error_unknown">Unknown Error</string>
+
     <string name="message_general_loading">Loading ....</string>
 
     <string name="update_capability">Update Capability</string>

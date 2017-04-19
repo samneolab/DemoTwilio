@@ -23,6 +23,8 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.neo_lab.demotwilio.R;
 import com.neo_lab.demotwilio.model.Token;
 import com.neo_lab.demotwilio.share_preferences_manager.SharedPreferencesManager;
+import com.neo_lab.demotwilio.ui.base.BaseActivity;
+import com.neo_lab.demotwilio.ui.common.Dialog;
 import com.twilio.video.AudioTrack;
 import com.twilio.video.CameraCapturer;
 import com.twilio.video.ConnectOptions;
@@ -44,7 +46,7 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class VideoCallingRoomActivity extends AppCompatActivity implements VideoCallingRoomContract.View {
+public class VideoCallingRoomActivity extends BaseActivity implements VideoCallingRoomContract.View {
 
     private static final int CAMERA_MIC_PERMISSION_REQUEST_CODE = 1;
 
@@ -691,7 +693,7 @@ public class VideoCallingRoomActivity extends AppCompatActivity implements Video
     }
 
     @Override
-    public Context getContext() {
+    public BaseActivity getActivity() {
         return VideoCallingRoomActivity.this;
     }
 }

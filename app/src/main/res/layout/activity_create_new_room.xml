@@ -7,6 +7,120 @@
     android:fitsSystemWindows="true"
     tools:context="com.neo_lab.demotwilio.ui.create_new_room.CreateNewRoomActivity">
 
-    <include layout="@layout/content_create_new_room" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/ln_tab"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/general_input_height"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <Button
+                android:id="@+id/bt_customer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/border_tab_button_active"
+                android:text="@string/tab_customer" />
+
+            <Button
+                android:id="@+id/bt_company"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/border_tab_button_not_active"
+                android:text="@string/tab_company" />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/rl_customer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <ImageView
+                android:id="@+id/im_connect_to_room"
+                android:layout_width="300dp"
+                android:layout_height="250dp"
+                android:layout_marginTop="26dp"
+                app:srcCompat="@drawable/ic_cloud"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true" />
+
+            <ImageView
+                android:id="@+id/imageView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/im_connect_to_room"
+                android:layout_centerHorizontal="true"
+                app:srcCompat="@drawable/up" />
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/imageView3"
+                android:layout_centerHorizontal="true"
+                android:text="@string/user_connect_room_guide"
+                android:textColor="@color/black"
+                android:textSize="@dimen/general_text_size" />
+
+            <TextView
+                android:id="@+id/tv_customer_name_room"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/imageView3"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="90dp"
+                android:text="1234"
+                android:textColor="@color/black"
+                android:textSize="@dimen/general_title" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rl_company"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingLeft="@dimen/general_magrin"
+            android:paddingRight="@dimen/general_magrin"
+            android:visibility="gone">
+
+            <EditText
+                android:id="@+id/ed_room_existed"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/general_input_height"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="109dp"
+                android:layout_toStartOf="@+id/bt_ok"
+                android:background="@drawable/border_edit_text"
+                android:ems="10"
+                android:gravity="center_vertical|center_horizontal|center"
+                android:hint="@string/user_connect_room_hint"
+                android:inputType="number"
+                android:maxLength="4"
+                android:textColor="@color/black"
+                android:textSize="@dimen/general_text_size" />
+
+            <Button
+                android:id="@+id/bt_ok"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/general_input_height"
+                android:layout_alignBaseline="@+id/ed_room_existed"
+                android:layout_alignBottom="@+id/ed_room_existed"
+                android:layout_alignParentEnd="true"
+                android:layout_marginLeft="@dimen/general_edit_text_size"
+                android:background="@drawable/bg_button_connect_shape"
+                android:text="Ok" />
+        </RelativeLayout>
+
+    </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>

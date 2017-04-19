@@ -12,7 +12,8 @@ import com.neo_lab.demotwilio.ui.base.BaseView;
 
 public interface CreateNewRoomContract {
 
-    interface View extends BaseView<Presenter> {
+
+    interface View extends BaseView {
 
         void showUI();
 
@@ -28,9 +29,9 @@ public interface CreateNewRoomContract {
 
     }
 
-    interface Presenter extends BasePresenter {
-
+    interface Presenter extends BasePresenter<View> {
         String generateRoomNumber();
-
     }
+
+
 }
