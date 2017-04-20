@@ -2,19 +2,14 @@ package com.neo_lab.demotwilio.ui.video_calling_room;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,7 +20,6 @@ import com.neo_lab.demotwilio.model.Token;
 import com.neo_lab.demotwilio.share_preferences_manager.Key;
 import com.neo_lab.demotwilio.share_preferences_manager.SharedPreferencesManager;
 import com.neo_lab.demotwilio.ui.base.BaseActivity;
-import com.neo_lab.demotwilio.ui.common.Dialog;
 import com.twilio.video.AudioTrack;
 import com.twilio.video.CameraCapturer;
 import com.twilio.video.ConnectOptions;
@@ -90,8 +84,6 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
     @BindView(R.id.local_video_action_fab) FloatingActionButton localVideoActionFab;
 
     @BindView(R.id.mute_action_fab) FloatingActionButton muteActionFab;
-
-    private android.support.v7.app.AlertDialog alertDialog;
 
     private AudioManager audioManager;
 
@@ -245,38 +237,24 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         /*
          * Set the initial state of the UI
          */
-        intializeUI();
+        intializeActionFabs();
 
     }
 
-    private void intializeUI() {
+    private void intializeActionFabs() {
+
         switchCameraActionFab.show();
         switchCameraActionFab.setOnClickListener(switchCameraClickListener());
+
         localVideoActionFab.show();
         localVideoActionFab.setOnClickListener(localVideoClickListener());
+
         muteActionFab.show();
         muteActionFab.setOnClickListener(muteClickListener());
 
         disConnectActionFab.show();
-        disConnectActionFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new MaterialDialog.Builder(VideoCallingRoomActivity.this)
-                        .title(R.string.app_name)
-                        .content(R.string.content_leaving_room)
-                        .positiveText(R.string.action_yes)
-                        .negativeText(R.string.action_no)
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+        disConnectActionFab.setOnClickListener(disConnectVideoCallingRoom());
 
-                                finish();
-
-                            }
-                        })
-                        .show();
-            }
-        });
     }
 
     private void createLocalMedia() {
@@ -321,7 +299,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
                 // Only reinitialize the UI if disconnect was not called from onDestroy()
                 if (!disconnectedFromOnDestroy) {
                     setAudioFocus(false);
-                    intializeUI();
+                    intializeActionFabs();
                     moveLocalVideoToPrimaryView();
                 }
             }
@@ -405,18 +383,6 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         };
     }
 
-    private DialogInterface.OnClickListener connectClickListener(final EditText roomEditText) {
-        return new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                /*
-                 * Connect to room
-                 */
-//                connectToRoom(roomEditText.getText().toString());
-            }
-        };
-    }
 
     private void connectToVideoRoom(String roomName, String accessToken) {
 
@@ -427,7 +393,6 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
                 .build();
 
         room = Video.connect(VideoCallingRoomActivity.this, connectOptions, roomListener());
-        setDisconnectAction();
     }
 
 
@@ -450,39 +415,6 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         }
     }
 
-    private View.OnClickListener disconnectClickListener() {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                /*
-                 * Disconnect from room
-                 */
-                if (room != null) {
-                    room.disconnect();
-                }
-                intializeUI();
-            }
-        };
-    }
-
-    private View.OnClickListener connectActionClickListener() {
-        return new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                showConnectDialog();
-            }
-        };
-    }
-
-    private DialogInterface.OnClickListener cancelConnectDialogClickListener() {
-        return new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                intializeUI();
-                alertDialog.dismiss();
-            }
-        };
-    }
 
     private View.OnClickListener switchCameraClickListener() {
         return new View.OnClickListener() {
@@ -547,22 +479,30 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         };
     }
 
-    /*
- * The actions performed during disconnect.
- */
-    private void setDisconnectAction() {
+    private View.OnClickListener disConnectVideoCallingRoom() {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
+                new MaterialDialog.Builder(VideoCallingRoomActivity.this)
+                        .title(R.string.app_name)
+                        .content(R.string.content_leaving_room)
+                        .positiveText(R.string.action_yes)
+                        .negativeText(R.string.action_no)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+
+                                finish();
+
+                            }
+                        })
+                        .show();
+
+            }
+        };
     }
 
-    /*
-     * Creates an connect UI dialog
-     */
-    private void showConnectDialog() {
-        EditText roomEditText = new EditText(this);
-        alertDialog = Dialog.createConnectDialog(roomEditText,
-                connectClickListener(roomEditText), cancelConnectDialogClickListener(), this);
-        alertDialog.show();
-    }
 
     /*
      * Called when participant joins the room

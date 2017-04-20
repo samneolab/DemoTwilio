@@ -121,7 +121,7 @@ public class CreateNewRoomActivity extends BaseActivity implements CreateNewRoom
         new MaterialDialog.Builder(CreateNewRoomActivity.this)
                 .title(R.string.app_name)
                 .content(R.string.user_name_hint)
-                .cancelable(false)
+                .cancelable(true)
                 .inputType(InputType.TYPE_CLASS_TEXT)
                 .alwaysCallInputCallback()
                 .input(R.string.user_connect_name_title, R.string.emtpy, new MaterialDialog.InputCallback() {
