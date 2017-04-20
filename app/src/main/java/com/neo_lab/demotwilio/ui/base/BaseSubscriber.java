@@ -50,11 +50,11 @@ public abstract class BaseSubscriber<T> extends Subscriber<Response<T>> {
 
         } else if (e instanceof SocketTimeoutException) {
 
-            view.onTimeOut(R.string.error_connection_time_out);
+            view.onTimeOut(R.string.error_message_connection_time_out);
 
         } else if (e instanceof IOException) {
 
-            view.onNetworkError(R.string.error_internet_unavailable);
+            view.onNetworkError(R.string.error_message_internet_unavailable);
 
         } else {
 

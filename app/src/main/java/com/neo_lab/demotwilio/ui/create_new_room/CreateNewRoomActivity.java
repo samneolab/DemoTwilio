@@ -2,7 +2,6 @@ package com.neo_lab.demotwilio.ui.create_new_room;
 
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -93,7 +92,7 @@ public class CreateNewRoomActivity extends BaseActivity implements CreateNewRoom
         View focusView = null;
 
         if (TextUtils.isEmpty(roomNumberExisted)) {
-            this.edRoomExisted.setError(getString(R.string.error_general_input_empty));
+            this.edRoomExisted.setError(getString(R.string.error_message_input_empty));
             focusView = this.edRoomExisted;
             cancel = true;
         }

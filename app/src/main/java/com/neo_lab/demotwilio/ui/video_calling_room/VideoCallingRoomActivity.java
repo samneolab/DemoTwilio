@@ -126,7 +126,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
                     presenter.requestTokenCallingVideo(deviceId, userName);
                 } else {
                     Toast.makeText(this,
-                            R.string.permissions_needed,
+                            R.string.permissions_message_needed,
                             Toast.LENGTH_LONG).show();
                 }
 
@@ -229,7 +229,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         String[] permissions = { Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO };
 
         if (!isSpecificPermissionsGranted(permissions)) {
-            requestSpecificPermissions(permissions, R.string.permissions_needed);
+            requestSpecificPermissions(permissions, R.string.permissions_message_needed);
         } else {
             createLocalMedia();
             presenter.requestTokenCallingVideo(deviceId, userName);
@@ -486,9 +486,9 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
                 new MaterialDialog.Builder(VideoCallingRoomActivity.this)
                         .title(R.string.app_name)
-                        .content(R.string.content_leaving_room)
-                        .positiveText(R.string.action_yes)
-                        .negativeText(R.string.action_no)
+                        .content(R.string.confirmation_message_leaving_video_calling_room)
+                        .positiveText(R.string.action_message_yes)
+                        .negativeText(R.string.action_message_no)
                         .onPositive(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {

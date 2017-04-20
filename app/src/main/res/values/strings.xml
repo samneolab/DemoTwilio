@@ -3,14 +3,43 @@
 
     <string name="emtpy"></string>
 
+    <!--Error Message-->
 
-    <string name="error_general_input_empty">Please fill here</string>
+    <string name="error_message_input_empty">Please fill here</string>
 
-    <string name="error_internet_unavailable">Internet Not Available</string>
+    <string name="error_message_internet_unavailable">Internet Not Available</string>
 
-    <string name="error_connection_time_out">Time Out</string>
+    <string name="error_message_connection_time_out">Time Out</string>
 
-    <string name="error_unknown">Unknown Error</string>
+    <string name="error_message_unknown">Unknown Error</string>
+
+
+    <!--Permissions Message-->
+
+    <string name="permissions_message_needed">Camera and Microphone permissions needed. Please allow in App Settings for additional functionality.</string>
+
+
+    <!--Confirmation Message-->
+
+    <string name="confirmation_message_leaving_video_calling_room">Are you leaving the video room</string>
+
+    <!--Hint Message-->
+
+    <string name="hint_message_enter_the_room_number">Enter the room number</string>
+
+
+    <!--Label Message-->
+
+    <string name="tab_label_customer">Customer</string>
+
+    <string name="tab_label_company">Company</string>
+
+    <!--Actions Message-->
+
+    <string name="action_message_yes">Yes</string>
+
+    <string name="action_message_no">No</string>
+
 
     <string name="message_general_loading">Loading ....</string>
 
@@ -42,7 +71,7 @@
 
     <string name="screen_capture_permission_not_granted">Screen capture permission not granted</string>
 
-    <string name="permissions_needed">Camera and Microphone permissions needed. Please allow in App Settings for additional functionality.</string>
+
 
     <string name="welcome">Welcome to Twilio Client</string>
 
@@ -52,16 +81,14 @@
     <string name="phone_number">phone number</string>
     <string name="create_new_room">Please click the following button If you are not belonging to any room now</string>
     <string name="room_existed">Please enter the room code If you already have one</string>
-    <string name="tab_customer">Customer</string>
-    <string name="tab_company">Company</string>
+
     <string name="user_connect_room_guide">Please click here</string>
-    <string name="user_connect_room_hint">Enter the room number</string>
+
 
     <string name="user_connect_name_title">User Name</string>
 
-    <string name="content_leaving_room">Are you leaving the video room</string>
-    <string name="action_yes">Yes</string>
-    <string name="action_no">No</string>
+
+
 
     <string-array name="types">
         <item>Client</item>
