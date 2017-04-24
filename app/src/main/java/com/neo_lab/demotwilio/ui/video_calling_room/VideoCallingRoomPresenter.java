@@ -1,10 +1,15 @@
 package com.neo_lab.demotwilio.ui.video_calling_room;
 
+import android.util.Log;
+
 import com.neo_lab.demotwilio.domain.error.APIError;
 import com.neo_lab.demotwilio.domain.generator.ServiceGenerator;
 import com.neo_lab.demotwilio.domain.response.TokenServer;
 import com.neo_lab.demotwilio.domain.services.TokenService;
 import com.neo_lab.demotwilio.ui.base.BaseSubscriber;
+import com.neo_lab.demotwilio.ui.video_calling_room.domain.usecase.GetToken;
+import com.neo_lab.demotwilio.use_case.UseCase;
+import com.neo_lab.demotwilio.use_case.UseCaseHandler;
 
 import retrofit2.Response;
 import rx.Observable;
@@ -22,42 +27,34 @@ public class VideoCallingRoomPresenter implements VideoCallingRoomContract.Prese
 
     private VideoCallingRoomContract.View view;
 
-    private TokenService service;
+    private final UseCaseHandler useCaseHandler;
 
-    private CompositeSubscription subscriptions;
+    private final GetToken getToken;
 
-    public VideoCallingRoomPresenter() {
-        this.service = ServiceGenerator.createService(TokenService.class);
-        this.subscriptions = new CompositeSubscription();
+    public VideoCallingRoomPresenter(UseCaseHandler useCaseHandler, GetToken getToken) {
+        this.useCaseHandler = useCaseHandler;
+        this.getToken = getToken;
     }
 
 
     @Override
     public void requestTokenCallingVideo(String deviceId, String userName) {
 
-        Observable<Response<TokenServer>> observable =
-                service.getTokenVideo(deviceId, userName);
+        GetToken.RequestValues requestValues = new GetToken.RequestValues(deviceId, userName);
 
-        subscriptions.add(observable.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new BaseSubscriber<TokenServer>(view.getActivity()) {
-                    @Override
-                    public void handleViewOnRequestSuccess(TokenServer data) {
-                        view.onListenerRequestVideoToken(true, "Connected Successfully", data);
-                    }
+        useCaseHandler.execute(getToken, requestValues, new UseCase.UseCaseCallback<GetToken.ResponseValue>() {
+            @Override
+            public void onSuccess(GetToken.ResponseValue response) {
+                view.onListenerRequestVideoToken(true, "Connected Successfully", response.getToken());
+            }
 
-                    @Override
-                    public void handleViewOnRequestError(APIError apiError) {
-                        view.onListenerRequestVideoToken(false, apiError.message(), null);
-                    }
+            @Override
+            public void onError() {
 
-                    @Override
-                    public void handleViewOnConnectSeverError() {
-                        view.onListenerRequestVideoToken(false, "Internet is not available\nCheck and try again", null);
-                    }
-                })
-        );
+                Log.e(TAG, "requestTokenCallingVideo");
 
+            }
+        });
     }
 
     @Override
@@ -67,6 +64,6 @@ public class VideoCallingRoomPresenter implements VideoCallingRoomContract.Prese
 
     @Override
     public void detachView() {
-        this.subscriptions.clear();
+
     }
 }

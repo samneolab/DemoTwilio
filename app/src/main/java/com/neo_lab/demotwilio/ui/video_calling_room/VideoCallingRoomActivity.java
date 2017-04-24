@@ -20,6 +20,8 @@ import com.neo_lab.demotwilio.model.Token;
 import com.neo_lab.demotwilio.share_preferences_manager.Key;
 import com.neo_lab.demotwilio.share_preferences_manager.SharedPreferencesManager;
 import com.neo_lab.demotwilio.ui.base.BaseActivity;
+import com.neo_lab.demotwilio.ui.video_calling_room.domain.usecase.GetToken;
+import com.neo_lab.demotwilio.use_case.UseCaseHandler;
 import com.twilio.video.AudioTrack;
 import com.twilio.video.CameraCapturer;
 import com.twilio.video.ConnectOptions;
@@ -100,7 +102,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         super.onCreate(savedInstanceState);
 
         // Initialize Presenter
-        presenter = new VideoCallingRoomPresenter();
+        presenter = new VideoCallingRoomPresenter(UseCaseHandler.getInstance(), new GetToken(this));
         presenter.attachView(this);
 
         setContentView(R.layout.activity_video_calling_room);
@@ -511,9 +513,9 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         /*
          * This app only displays video for one additional participant per Room
          */
-//        if (thumbnailVideoView.getVisibility() == View.VISIBLE) {
-//            return;
-//        }
+        if (thumbnailVideoView.getVisibility() == View.VISIBLE) {
+            return;
+        }
         participantIdentity = participant.getIdentity();
         videoStatusTextView.setText("Participant "+ participantIdentity + " joined");
 
