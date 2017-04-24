@@ -10,6 +10,8 @@ import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +40,8 @@ import com.twilio.video.VideoRenderer;
 import com.twilio.video.VideoTrack;
 import com.twilio.video.VideoView;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -63,7 +67,9 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
      * A VideoView receives frames from a local or remote video track and renders them
      * to an associated view.
      */
-    @BindView(R.id.primary_video_view) VideoView primaryVideoView;
+//    @BindView(R.id.primary_video_view) VideoView primaryVideoView;
+
+    private List<VideoView> videoViews = new ArrayList<>();
 
     @BindView(R.id.thumbnail_video_view) VideoView thumbnailVideoView;
     /*
@@ -97,6 +103,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
     private boolean disconnectedFromOnDestroy;
 
+    @BindView(R.id.video_container) RelativeLayout videoContainer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,6 +118,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         ButterKnife.bind(this);
 
         getLocalProperties();
+
+        showUI();
 
         initializeCallingVideoRoom();
 
@@ -127,9 +137,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
                     createLocalMedia();
                     presenter.requestTokenCallingVideo(deviceId, userName);
                 } else {
-                    Toast.makeText(this,
-                            R.string.permissions_message_needed,
-                            Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, R.string.permissions_message_needed, Toast.LENGTH_LONG).show();
                 }
 
                 break;
@@ -207,6 +215,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
     @Override
     public void showUI() {
+        VideoView videoView = (VideoView) findViewById(R.id.primary_video_view);
+        videoViews.add(videoView);
 
     }
 
@@ -268,9 +278,9 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         // Share your camera
         cameraCapturer = new CameraCapturer(this, CameraCapturer.CameraSource.FRONT_CAMERA);
         localVideoTrack = localMedia.addVideoTrack(true, cameraCapturer);
-        primaryVideoView.setMirror(true);
-        localVideoTrack.addRenderer(primaryVideoView);
-        localVideoView = primaryVideoView;
+        videoViews.get(0).setMirror(true);
+        localVideoTrack.addRenderer(videoViews.get(0));
+        localVideoView = videoViews.get(0);
     }
 
     /*
@@ -428,7 +438,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
                     if (thumbnailVideoView.getVisibility() == View.VISIBLE) {
                         thumbnailVideoView.setMirror(cameraSource == CameraCapturer.CameraSource.BACK_CAMERA);
                     } else {
-                        primaryVideoView.setMirror(cameraSource == CameraCapturer.CameraSource.BACK_CAMERA);
+                        videoViews.get(0).setMirror(cameraSource == CameraCapturer.CameraSource.BACK_CAMERA);
                     }
                 }
             }
@@ -513,9 +523,9 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         /*
          * This app only displays video for one additional participant per Room
          */
-        if (thumbnailVideoView.getVisibility() == View.VISIBLE) {
-            return;
-        }
+//        if (thumbnailVideoView.getVisibility() == View.VISIBLE) {
+//            return;
+//        }
         participantIdentity = participant.getIdentity();
         videoStatusTextView.setText("Participant "+ participantIdentity + " joined");
 
@@ -537,14 +547,14 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
      */
     private void addParticipantVideo(VideoTrack videoTrack) {
         moveLocalVideoToThumbnailView();
-        primaryVideoView.setMirror(false);
-        videoTrack.addRenderer(primaryVideoView);
+        videoViews.get(0).setMirror(false);
+        videoTrack.addRenderer(videoViews.get(0));
     }
 
     private void moveLocalVideoToThumbnailView() {
         if (thumbnailVideoView.getVisibility() == View.GONE) {
             thumbnailVideoView.setVisibility(View.VISIBLE);
-            localVideoTrack.removeRenderer(primaryVideoView);
+            localVideoTrack.removeRenderer(videoViews.get(0));
             localVideoTrack.addRenderer(thumbnailVideoView);
             localVideoView = thumbnailVideoView;
             thumbnailVideoView.setMirror(cameraCapturer.getCameraSource() ==
@@ -572,16 +582,16 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
     }
 
     private void removeParticipantVideo(VideoTrack videoTrack) {
-        videoTrack.removeRenderer(primaryVideoView);
+        videoTrack.removeRenderer(videoViews.get(0));
     }
 
     private void moveLocalVideoToPrimaryView() {
         if (thumbnailVideoView.getVisibility() == View.VISIBLE) {
             localVideoTrack.removeRenderer(thumbnailVideoView);
             thumbnailVideoView.setVisibility(View.GONE);
-            localVideoTrack.addRenderer(primaryVideoView);
-            localVideoView = primaryVideoView;
-            primaryVideoView.setMirror(cameraCapturer.getCameraSource() ==
+            localVideoTrack.addRenderer(videoViews.get(0));
+            localVideoView = videoViews.get(0);
+            videoViews.get(0).setMirror(cameraCapturer.getCameraSource() ==
                     CameraCapturer.CameraSource.FRONT_CAMERA);
         }
     }
