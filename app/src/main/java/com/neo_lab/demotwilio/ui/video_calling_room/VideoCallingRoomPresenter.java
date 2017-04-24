@@ -50,9 +50,7 @@ public class VideoCallingRoomPresenter implements VideoCallingRoomContract.Prese
 
             @Override
             public void onError() {
-
                 Log.e(TAG, "requestTokenCallingVideo");
-
             }
         });
     }

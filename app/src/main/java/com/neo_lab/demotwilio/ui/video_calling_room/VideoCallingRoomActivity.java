@@ -24,6 +24,7 @@ import com.neo_lab.demotwilio.share_preferences_manager.SharedPreferencesManager
 import com.neo_lab.demotwilio.ui.base.BaseActivity;
 import com.neo_lab.demotwilio.ui.video_calling_room.domain.usecase.GetToken;
 import com.neo_lab.demotwilio.use_case.UseCaseHandler;
+import com.neo_lab.demotwilio.utils.screen.ScreenUtils;
 import com.twilio.video.AudioTrack;
 import com.twilio.video.CameraCapturer;
 import com.twilio.video.ConnectOptions;
@@ -105,6 +106,12 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
     @BindView(R.id.video_container) RelativeLayout videoContainer;
 
+    private int totalRemoteUsers = 0;
+
+    private int screenHeight;
+
+    private int screenWidth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,9 +133,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
 
         switch (requestCode) {
             case PERMISSIONS_REQUEST_CODE:
@@ -218,6 +223,9 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         VideoView videoView = (VideoView) findViewById(R.id.primary_video_view);
         videoViews.add(videoView);
 
+        screenHeight = ScreenUtils.getScreenHeight(getActivity());
+        screenWidth = ScreenUtils.getScreenWidth(getActivity());
+
     }
 
 
@@ -294,8 +302,12 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
                 setTitle(room.getName());
 
                 for (Map.Entry<String, Participant> entry : room.getParticipants().entrySet()) {
+
+                    totalRemoteUsers++;
+
+                    Log.e(TAG, "onConnected " + totalRemoteUsers + "");
+
                     addParticipant(entry.getValue());
-                    break;
                 }
             }
 
@@ -318,6 +330,11 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
             @Override
             public void onParticipantConnected(Room room, Participant participant) {
+
+                totalRemoteUsers++;
+
+                Log.e(TAG, "onParticipantConnected " + totalRemoteUsers + "");
+
                 addParticipant(participant);
 
             }
@@ -533,6 +550,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
          * Add participant renderer
          */
         if (participant.getMedia().getVideoTracks().size() > 0) {
+            Log.e(TAG, "Participant Size " + participant.getMedia().getVideoTracks().size());
             addParticipantVideo(participant.getMedia().getVideoTracks().get(0));
         }
 
@@ -540,18 +558,76 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
          * Start listening for participant media events
          */
         participant.getMedia().setListener(mediaListener());
+
+
+    }
+
+    private void addNewVideoView(int position) {
+
+        videoViews.get(0).getLayoutParams().width = screenWidth;
+        videoViews.get(0).getLayoutParams().height = screenHeight / totalRemoteUsers;;
+        videoViews.get(0).requestLayout();
+
+        VideoView videoView = new VideoView(VideoCallingRoomActivity.this);
+        videoViews.add(videoView);
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.ALIGN_LEFT, RelativeLayout.TRUE);
+
+        videoContainer.addView(videoViews.get(position), params);
+        videoViews.get(position).getLayoutParams().height = screenHeight / totalRemoteUsers;
+        videoViews.get(position).getLayoutParams().width = screenWidth;
+        videoViews.get(position).requestLayout();
+
+    }
+
+    private void addNewVideoParticipant(int position, VideoView videoView, int height, int width) {
+
+        videoViews.add(videoView);
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.ALIGN_LEFT, RelativeLayout.TRUE);
+
+        videoContainer.addView(videoViews.get(position), params);
+
+        videoViews.get(position).getLayoutParams().height = height;
+        videoViews.get(position).getLayoutParams().width = width;
+        videoViews.get(position).requestLayout();
     }
 
     /*
      * Set primary view as renderer for participant video track
      */
     private void addParticipantVideo(VideoTrack videoTrack) {
-        moveLocalVideoToThumbnailView();
-        videoViews.get(0).setMirror(false);
-        videoTrack.addRenderer(videoViews.get(0));
+
+        switch (totalRemoteUsers) {
+            case 1:
+                moveLocalVideoToThumbnailView();
+                videoViews.get(0).setMirror(false);
+                videoTrack.addRenderer(videoViews.get(0));
+                break;
+            case 2:
+                addNewVideoView(1);
+                videoViews.get(1).setMirror(false);
+                videoTrack.addRenderer(videoViews.get(1));
+                break;
+        }
     }
 
     private void moveLocalVideoToThumbnailView() {
+        if (thumbnailVideoView.getVisibility() == View.GONE) {
+            thumbnailVideoView.setVisibility(View.VISIBLE);
+            localVideoTrack.removeRenderer(videoViews.get(0));
+            localVideoTrack.addRenderer(thumbnailVideoView);
+            localVideoView = thumbnailVideoView;
+            thumbnailVideoView.setMirror(cameraCapturer.getCameraSource() ==
+                    CameraCapturer.CameraSource.FRONT_CAMERA);
+        }
+    }
+
+    private void moveLocalVideoToThumbnailViewForFisrtParticipant() {
         if (thumbnailVideoView.getVisibility() == View.GONE) {
             thumbnailVideoView.setVisibility(View.VISIBLE);
             localVideoTrack.removeRenderer(videoViews.get(0));
