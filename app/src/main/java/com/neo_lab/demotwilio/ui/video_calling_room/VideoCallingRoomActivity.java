@@ -8,6 +8,9 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -20,6 +23,7 @@ import com.neo_lab.demotwilio.model.Token;
 import com.neo_lab.demotwilio.share_preferences_manager.Key;
 import com.neo_lab.demotwilio.share_preferences_manager.SharedPreferencesManager;
 import com.neo_lab.demotwilio.ui.base.BaseActivity;
+import com.neo_lab.demotwilio.ui.video_calling_room.domain.model.VideoViewTwilio;
 import com.neo_lab.demotwilio.ui.video_calling_room.domain.usecase.GetToken;
 import com.neo_lab.demotwilio.use_case.UseCaseHandler;
 import com.twilio.video.AudioTrack;
@@ -38,6 +42,8 @@ import com.twilio.video.VideoRenderer;
 import com.twilio.video.VideoTrack;
 import com.twilio.video.VideoView;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -97,6 +103,12 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
     private boolean disconnectedFromOnDestroy;
 
+    private List<VideoViewTwilio> videoViewTwilios;
+
+    @BindView(R.id.rc_video_view) RecyclerView rcVideoView;
+
+    private VideoViewAdapter videoViewAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,6 +124,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         getLocalProperties();
 
         initializeCallingVideoRoom();
+
+        showUI();
 
     }
 
@@ -208,6 +222,14 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
     @Override
     public void showUI() {
 
+        videoViewTwilios = new ArrayList<>();
+        videoViewAdapter = new VideoViewAdapter(videoViewTwilios);
+        rcVideoView.setAdapter(videoViewAdapter);
+
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
+
+        rcVideoView.setLayoutManager(gridLayoutManager);
+
     }
 
 
@@ -285,7 +307,6 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
                 for (Map.Entry<String, Participant> entry : room.getParticipants().entrySet()) {
                     addParticipant(entry.getValue());
-                    break;
                 }
             }
 
@@ -309,11 +330,14 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
             @Override
             public void onParticipantConnected(Room room, Participant participant) {
                 addParticipant(participant);
-
             }
 
             @Override
             public void onParticipantDisconnected(Room room, Participant participant) {
+
+
+                Log.e(TAG, "onParticipantDisconnected");
+
                 removeParticipant(participant);
             }
 
@@ -337,7 +361,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         };
     }
 
-    private Media.Listener mediaListener() {
+    private Media.Listener mediaListener(final Participant participant) {
         return new Media.Listener() {
 
             @Override
@@ -354,7 +378,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
             @Override
             public void onVideoTrackAdded(Media media, VideoTrack videoTrack) {
                 videoStatusTextView.setText("onVideoTrackAdded");
-                addParticipantVideo(videoTrack);
+                Log.e(TAG, "onVideoTrackAdded");
+                addParticipantVideo(videoTrack, participant);
             }
 
             @Override
@@ -513,9 +538,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         /*
          * This app only displays video for one additional participant per Room
          */
-        if (thumbnailVideoView.getVisibility() == View.VISIBLE) {
-            return;
-        }
+
         participantIdentity = participant.getIdentity();
         videoStatusTextView.setText("Participant "+ participantIdentity + " joined");
 
@@ -523,32 +546,40 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
          * Add participant renderer
          */
         if (participant.getMedia().getVideoTracks().size() > 0) {
-            addParticipantVideo(participant.getMedia().getVideoTracks().get(0));
+            addParticipantVideo(participant.getMedia().getVideoTracks().get(0), participant);
         }
 
         /*
          * Start listening for participant media events
          */
-        participant.getMedia().setListener(mediaListener());
+        participant.getMedia().setListener(mediaListener(participant));
     }
 
     /*
      * Set primary view as renderer for participant video track
      */
-    private void addParticipantVideo(VideoTrack videoTrack) {
+    private void addParticipantVideo(VideoTrack videoTrack, Participant participant) {
+
         moveLocalVideoToThumbnailView();
-        primaryVideoView.setMirror(false);
-        videoTrack.addRenderer(primaryVideoView);
+
+        Log.e(TAG, "addParticipantVideo => " + videoTrack.getTrackId());
+
+        videoViewTwilios.add(new VideoViewTwilio(videoTrack, participant));
+
+        videoViewAdapter.notifyItemInserted(videoViewTwilios.size() - 1);
+//        primaryVideoView.setMirror(false);
+//        videoTrack.addRenderer(primaryVideoView);
     }
 
     private void moveLocalVideoToThumbnailView() {
         if (thumbnailVideoView.getVisibility() == View.GONE) {
             thumbnailVideoView.setVisibility(View.VISIBLE);
             localVideoTrack.removeRenderer(primaryVideoView);
+            primaryVideoView.setMirror(false);
+            primaryVideoView.setVisibility(View.GONE);
             localVideoTrack.addRenderer(thumbnailVideoView);
             localVideoView = thumbnailVideoView;
-            thumbnailVideoView.setMirror(cameraCapturer.getCameraSource() ==
-                    CameraCapturer.CameraSource.FRONT_CAMERA);
+            thumbnailVideoView.setMirror(cameraCapturer.getCameraSource() == CameraCapturer.CameraSource.FRONT_CAMERA);
         }
     }
 
@@ -557,22 +588,57 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
      */
     private void removeParticipant(Participant participant) {
         videoStatusTextView.setText("Participant "+participant.getIdentity()+ " left.");
-        if (!participant.getIdentity().equals(participantIdentity)) {
-            return;
-        }
+//        if (!participant.getIdentity().equals(participantIdentity)) {
+//            return;
+//        }
 
         /*
          * Remove participant renderer
          */
-        if (participant.getMedia().getVideoTracks().size() > 0) {
-            removeParticipantVideo(participant.getMedia().getVideoTracks().get(0));
+
+        int temp = 0;
+
+        for (int index = 0; index < videoViewTwilios.size(); index++) {
+            if (videoViewTwilios.get(index).getParticipant().getSid().equals(participant.getSid())) {
+                temp = index;
+                Log.e(TAG, temp + "");
+                break;
+            }
+
         }
+
+        videoViewTwilios.remove(temp);
+        videoViewAdapter.notifyItemRemoved(temp);
+
+
+
+//        if (participant.getMedia().getVideoTracks().size() > 0) {
+//            Log.e(TAG, "removeParticipant");
+//            removeParticipantVideo(participant.getMedia().getVideoTracks().get(0));
+//        }
+
+
         participant.getMedia().setListener(null);
-        moveLocalVideoToPrimaryView();
+//        moveLocalVideoToPrimaryView();
     }
 
     private void removeParticipantVideo(VideoTrack videoTrack) {
-        videoTrack.removeRenderer(primaryVideoView);
+
+        int temp = 0;
+
+        for (int index = 0; index < videoViewTwilios.size(); index++) {
+            if (videoViewTwilios.get(index).getId().equals(videoTrack.getTrackId())) {
+                temp = index;
+                Log.e(TAG, temp + "");
+                break;
+            }
+
+        }
+
+        videoViewTwilios.remove(temp);
+        videoViewAdapter.notifyDataSetChanged();
+
+//        videoTrack.removeRenderer(primaryVideoView);
     }
 
     private void moveLocalVideoToPrimaryView() {
