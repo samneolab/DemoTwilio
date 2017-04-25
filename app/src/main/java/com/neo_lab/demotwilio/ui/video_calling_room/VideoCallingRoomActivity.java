@@ -10,6 +10,7 @@ import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -25,6 +26,7 @@ import com.neo_lab.demotwilio.ui.base.BaseActivity;
 import com.neo_lab.demotwilio.ui.video_calling_room.domain.usecase.GetToken;
 import com.neo_lab.demotwilio.use_case.UseCaseHandler;
 import com.neo_lab.demotwilio.utils.screen.ScreenUtils;
+import com.neo_lab.demotwilio.utils.view.ViewUtils;
 import com.twilio.video.AudioTrack;
 import com.twilio.video.CameraCapturer;
 import com.twilio.video.ConnectOptions;
@@ -97,6 +99,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
     private AudioManager audioManager;
 
     private String participantIdentity;
+
+    private List<String> participantIds;
 
     private int previousAudioMode;
 
@@ -225,6 +229,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
         screenHeight = ScreenUtils.getScreenHeight(getActivity());
         screenWidth = ScreenUtils.getScreenWidth(getActivity());
+
+        participantIds = new ArrayList<>();
 
     }
 
@@ -387,6 +393,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
             @Override
             public void onVideoTrackRemoved(Media media, VideoTrack videoTrack) {
                 videoStatusTextView.setText("onVideoTrackRemoved");
+                Log.e(TAG, "onVideoTrackRemoved");
                 removeParticipantVideo(videoTrack);
             }
 
@@ -543,14 +550,16 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 //        if (thumbnailVideoView.getVisibility() == View.VISIBLE) {
 //            return;
 //        }
+        participantIds.add(participant.getSid());
+
         participantIdentity = participant.getIdentity();
+
         videoStatusTextView.setText("Participant "+ participantIdentity + " joined");
 
         /*
          * Add participant renderer
          */
         if (participant.getMedia().getVideoTracks().size() > 0) {
-            Log.e(TAG, "Participant Size " + participant.getMedia().getVideoTracks().size());
             addParticipantVideo(participant.getMedia().getVideoTracks().get(0));
         }
 
@@ -560,41 +569,6 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         participant.getMedia().setListener(mediaListener());
 
 
-    }
-
-    private void addNewVideoView(int position) {
-
-        videoViews.get(0).getLayoutParams().width = screenWidth;
-        videoViews.get(0).getLayoutParams().height = screenHeight / totalRemoteUsers;;
-        videoViews.get(0).requestLayout();
-
-        VideoView videoView = new VideoView(VideoCallingRoomActivity.this);
-        videoViews.add(videoView);
-
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-        params.addRule(RelativeLayout.ALIGN_LEFT, RelativeLayout.TRUE);
-
-        videoContainer.addView(videoViews.get(position), params);
-        videoViews.get(position).getLayoutParams().height = screenHeight / totalRemoteUsers;
-        videoViews.get(position).getLayoutParams().width = screenWidth;
-        videoViews.get(position).requestLayout();
-
-    }
-
-    private void addNewVideoParticipant(int position, VideoView videoView, int height, int width) {
-
-        videoViews.add(videoView);
-
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-        params.addRule(RelativeLayout.ALIGN_LEFT, RelativeLayout.TRUE);
-
-        videoContainer.addView(videoViews.get(position), params);
-
-        videoViews.get(position).getLayoutParams().height = height;
-        videoViews.get(position).getLayoutParams().width = width;
-        videoViews.get(position).requestLayout();
     }
 
     /*
@@ -609,49 +583,176 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
                 videoTrack.addRenderer(videoViews.get(0));
                 break;
             case 2:
-                addNewVideoView(1);
+                adjustViewWithTwoRemoteUsers();
                 videoViews.get(1).setMirror(false);
                 videoTrack.addRenderer(videoViews.get(1));
                 break;
+            case 3:
+                adjustViewWithThreeRemoteUsers();
+                videoViews.get(2).setMirror(false);
+                videoTrack.addRenderer(videoViews.get(2));
+                break;
+
+            case 4:
+                adjustViewWithFourRemoteUsers();
+                videoViews.get(3).setMirror(false);
+                videoTrack.addRenderer(videoViews.get(3));
+                break;
+            case 5:
+                adjustViewWithFiveRemoteUsers();
+                videoViews.get(4).setMirror(false);
+                videoTrack.addRenderer(videoViews.get(4));
+                break;
         }
     }
+
+    private void adjustViewWithFiveRemoteUsers() {
+
+        videoViews.get(3).getLayoutParams().width = screenWidth / 2;
+        videoViews.get(3).requestLayout();
+
+        VideoView videoViewForFifthUser = new VideoView(VideoCallingRoomActivity.this);
+        videoViewForFifthUser.setId(R.id.video_view_4);
+        videoViews.add(videoViewForFifthUser);
+
+        RelativeLayout.LayoutParams paramsForFifthUser = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        paramsForFifthUser.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
+        paramsForFifthUser.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+
+        videoContainer.addView(videoViews.get(4), paramsForFifthUser);
+        videoViews.get(4).getLayoutParams().height = screenHeight / 3;
+        videoViews.get(4).getLayoutParams().width = screenWidth / 2;
+        videoViews.get(4).requestLayout();
+
+    }
+
+    private void adjustViewWithFourRemoteUsers() {
+
+        videoViews.get(0).getLayoutParams().height = screenHeight / 3;
+        videoViews.get(0).requestLayout();
+
+        videoViews.get(1).getLayoutParams().height = screenHeight / 3;
+        videoViews.get(1).requestLayout();
+
+        videoViews.get(2).getLayoutParams().height = screenHeight / 3;
+
+        videoViews.get(2).requestLayout();
+
+        VideoView videoViewForFourUser = new VideoView(VideoCallingRoomActivity.this);
+        videoViewForFourUser.setId(R.id.video_view_3);
+        videoViews.add(videoViewForFourUser);
+
+        RelativeLayout.LayoutParams paramsForFourUser = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        paramsForFourUser.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
+        paramsForFourUser.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+
+        videoContainer.addView(videoViews.get(3), paramsForFourUser);
+        videoViews.get(3).getLayoutParams().height = screenHeight / 3;
+        videoViews.get(3).getLayoutParams().width = screenWidth;
+        videoViews.get(3).requestLayout();
+
+        thumbnailVideoView.getLayoutParams().width = screenWidth / 2;
+        thumbnailVideoView.getLayoutParams().height = screenHeight / 3;
+        thumbnailVideoView.requestLayout();
+
+    }
+
+    private void adjustViewWithThreeRemoteUsers() {
+
+        thumbnailVideoView.getLayoutParams().width = screenWidth / 2;
+        thumbnailVideoView.getLayoutParams().height = screenHeight / 2;
+        thumbnailVideoView.requestLayout();
+
+        // The Second Remote User Left Top
+        VideoView videoViewForThirdUser = new VideoView(VideoCallingRoomActivity.this);
+        videoViewForThirdUser.setId(R.id.video_view_2);
+        videoViews.add(videoViewForThirdUser);
+
+        RelativeLayout.LayoutParams paramsForThirdUser = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        paramsForThirdUser.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+        paramsForThirdUser.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+
+        videoContainer.addView(videoViews.get(2), paramsForThirdUser);
+        videoViews.get(2).getLayoutParams().height = screenHeight / 2;
+        videoViews.get(2).getLayoutParams().width = screenWidth / 2;
+        videoViews.get(2).requestLayout();
+
+    }
+
+    private void adjustViewWithTwoRemoteUsers() {
+        // First User To The Right Top
+        videoViews.get(0).getLayoutParams().width = screenWidth / 2;
+        videoViews.get(0).getLayoutParams().height = screenHeight / 2;
+        videoViews.get(0).requestLayout();
+
+        // The Second Remote User Left Top
+        VideoView videoViewForSecondUser = new VideoView(VideoCallingRoomActivity.this);
+        videoViewForSecondUser.setId(R.id.video_view_1);
+        videoViews.add(videoViewForSecondUser);
+
+        RelativeLayout.LayoutParams paramsForSecondUser = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        paramsForSecondUser.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+        paramsForSecondUser.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+
+        videoContainer.addView(videoViews.get(1), paramsForSecondUser);
+        videoViews.get(1).getLayoutParams().height = screenHeight / 2;
+        videoViews.get(1).getLayoutParams().width = screenWidth / 2;
+        videoViews.get(1).requestLayout();
+
+        thumbnailVideoView.getLayoutParams().width = screenWidth;
+        thumbnailVideoView.getLayoutParams().height = screenHeight / 2;
+        thumbnailVideoView.requestLayout();
+
+        ViewUtils.setMargins(thumbnailVideoView, 0, 0, 0, 0);
+
+    }
+
+
+
 
     private void moveLocalVideoToThumbnailView() {
         if (thumbnailVideoView.getVisibility() == View.GONE) {
             thumbnailVideoView.setVisibility(View.VISIBLE);
             localVideoTrack.removeRenderer(videoViews.get(0));
             localVideoTrack.addRenderer(thumbnailVideoView);
+
+            ViewUtils.setMargins(thumbnailVideoView, 0, 0, 0, 120);
+
             localVideoView = thumbnailVideoView;
-            thumbnailVideoView.setMirror(cameraCapturer.getCameraSource() ==
-                    CameraCapturer.CameraSource.FRONT_CAMERA);
+            thumbnailVideoView.setMirror(cameraCapturer.getCameraSource() == CameraCapturer.CameraSource.FRONT_CAMERA);
         }
     }
 
-    private void moveLocalVideoToThumbnailViewForFisrtParticipant() {
-        if (thumbnailVideoView.getVisibility() == View.GONE) {
-            thumbnailVideoView.setVisibility(View.VISIBLE);
-            localVideoTrack.removeRenderer(videoViews.get(0));
-            localVideoTrack.addRenderer(thumbnailVideoView);
-            localVideoView = thumbnailVideoView;
-            thumbnailVideoView.setMirror(cameraCapturer.getCameraSource() ==
-                    CameraCapturer.CameraSource.FRONT_CAMERA);
+    private int findParticipantIdLeftRoom(String id) {
+
+        for (int index = 0; index < participantIds.size(); index++) {
+            if (id.equals(participantIds.get(index))) {
+                Log.e(TAG, "findParticipantIdLeftRoom " + index);
+                return index;
+            }
+
         }
+
+        return participantIds.size() + 1;
+
     }
 
     /*
      * Called when participant leaves the room
      */
     private void removeParticipant(Participant participant) {
-        videoStatusTextView.setText("Participant "+participant.getIdentity()+ " left.");
-        if (!participant.getIdentity().equals(participantIdentity)) {
-            return;
-        }
+        videoStatusTextView.setText("Participant "+ participant.getIdentity()+ " left.");
+//        if (!participant.getIdentity().equals(participantIdentity)) {
+//            return;
+//        }
+
+        int positionOfParticipantLeftRoom = findParticipantIdLeftRoom(participant.getSid());
 
         /*
          * Remove participant renderer
          */
         if (participant.getMedia().getVideoTracks().size() > 0) {
-            removeParticipantVideo(participant.getMedia().getVideoTracks().get(0));
+            removeParticipantVideoByPosition(participant.getMedia().getVideoTracks().get(0), positionOfParticipantLeftRoom);
         }
         participant.getMedia().setListener(null);
         moveLocalVideoToPrimaryView();
@@ -659,6 +760,14 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
     private void removeParticipantVideo(VideoTrack videoTrack) {
         videoTrack.removeRenderer(videoViews.get(0));
+    }
+
+    private void removeParticipantVideoByPosition(VideoTrack videoTrack, int position) {
+        totalRemoteUsers --;
+        videoTrack.removeRenderer(videoViews.get(position));
+        videoViews.get(position).setVisibility(View.GONE);
+        videoViews.remove(position);
+        participantIds.remove(position);
     }
 
     private void moveLocalVideoToPrimaryView() {

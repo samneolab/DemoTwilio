@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="video_view_1" type="id"/>
+    <item name="video_view_2" type="id"/>
+    <item name="video_view_3" type="id"/>
+    <item name="video_view_4" type="id"/>
+    <item name="video_view_5" type="id"/>
+    <item name="video_view_6" type="id"/>
+    <item name="video_view_7" type="id"/>
+    <item name="video_view_8" type="id"/>
+    <item name="video_view_9" type="id"/>
+</resources>

@@ -17,13 +17,12 @@
         android:id="@+id/thumbnail_video_view"
         android:layout_width="150dp"
         android:layout_height="150dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
         android:layout_gravity="bottom|end"
-        android:layout_marginBottom="69dp"
         android:visibility="gone"
         app:mirror="true"
-        app:overlaySurface="true"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true" />
+        app:overlaySurface="true" />
 
 
 </RelativeLayout>
