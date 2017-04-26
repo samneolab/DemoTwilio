@@ -26,6 +26,7 @@ import com.neo_lab.demotwilio.ui.base.BaseActivity;
 import com.neo_lab.demotwilio.ui.video_calling_room.domain.model.VideoViewTwilio;
 import com.neo_lab.demotwilio.ui.video_calling_room.domain.usecase.GetToken;
 import com.neo_lab.demotwilio.use_case.UseCaseHandler;
+import com.neo_lab.demotwilio.utils.decorator.SpacesItemDecoration;
 import com.twilio.video.AudioTrack;
 import com.twilio.video.CameraCapturer;
 import com.twilio.video.ConnectOptions;
@@ -108,6 +109,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
     @BindView(R.id.rc_video_view) RecyclerView rcVideoView;
 
     private VideoViewAdapter videoViewAdapter;
+
+    private SpacesItemDecoration spacesItemDecoration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -230,6 +233,10 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
         rcVideoView.setLayoutManager(gridLayoutManager);
 
+        spacesItemDecoration = new SpacesItemDecoration(2);
+        rcVideoView.setHasFixedSize(true);
+        rcVideoView.addItemDecoration(spacesItemDecoration);
+
     }
 
 
@@ -244,7 +251,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         /*
          * Needed for setting/abandoning audio focus during call
          */
-        audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
         /*
          * Check camera and microphone permissions. Needed in Android M.
@@ -304,6 +311,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
             public void onConnected(Room room) {
                 videoStatusTextView.setText("Connected to the room number " + room.getName() + "\nThere is only you in this room\nPlease wait for another participant");
                 setTitle(room.getName());
+
+                Log.e(TAG, room.getParticipants().size() + "");
 
                 for (Map.Entry<String, Participant> entry : room.getParticipants().entrySet()) {
                     addParticipant(entry.getValue());
@@ -561,8 +570,6 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
     private void addParticipantVideo(VideoTrack videoTrack, Participant participant) {
 
         moveLocalVideoToThumbnailView();
-
-        Log.e(TAG, "addParticipantVideo => " + videoTrack.getTrackId());
 
         videoViewTwilios.add(new VideoViewTwilio(videoTrack, participant));
 

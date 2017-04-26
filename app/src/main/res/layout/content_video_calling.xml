@@ -21,8 +21,8 @@
 
     <com.twilio.video.VideoView
         android:id="@+id/thumbnail_video_view"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:layout_gravity="bottom|end"
         android:layout_marginBottom="80dp"
         android:layout_marginEnd="@dimen/general_magrin"
