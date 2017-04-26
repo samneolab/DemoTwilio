@@ -128,7 +128,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
         initializeCallingVideoRoom();
 
-        showUI();
+        initializeRecyclerViewVideoView();
 
     }
 
@@ -215,10 +215,10 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
         // Get Device Id
         deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-        userName = SharedPreferencesManager.getInstance(VideoCallingRoomActivity.this).
-                getString(Key.USER_NAME);
-        roomNumber = SharedPreferencesManager.getInstance(VideoCallingRoomActivity.this).
-                getString(Key.ROOM_NUMBER);
+
+        userName = SharedPreferencesManager.getInstance(VideoCallingRoomActivity.this).getString(Key.USER_NAME);
+        
+        roomNumber = SharedPreferencesManager.getInstance(VideoCallingRoomActivity.this).getString(Key.ROOM_NUMBER);
 
     }
 
@@ -288,7 +288,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
     }
 
-    private void createLocalMedia() {
+    @Override
+    public void createLocalMedia() {
         localMedia = LocalMedia.create(this);
 
         // Share your microphone
@@ -419,8 +420,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         };
     }
 
-
-    private void connectToVideoRoom(String roomName, String accessToken) {
+    @Override
+    public void connectToVideoRoom(String roomName, String accessToken) {
 
         setAudioFocus(true);
         ConnectOptions connectOptions = new ConnectOptions.Builder(accessToken)
@@ -432,7 +433,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
     }
 
 
-    private void setAudioFocus(boolean focus) {
+    @Override
+    public void setAudioFocus(boolean focus) {
         if (focus) {
             previousAudioMode = audioManager.getMode();
             // Request audio focus before making any device switch.
@@ -543,7 +545,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
     /*
      * Called when participant joins the room
      */
-    private void addParticipant(Participant participant) {
+    @Override
+    public void addParticipant(Participant participant) {
         /*
          * This app only displays video for one additional participant per Room
          */
@@ -567,7 +570,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
     /*
      * Set primary view as renderer for participant video track
      */
-    private void addParticipantVideo(VideoTrack videoTrack, Participant participant) {
+    @Override
+    public void addParticipantVideo(VideoTrack videoTrack, Participant participant) {
 
         moveLocalVideoToThumbnailView();
 
@@ -578,7 +582,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 //        videoTrack.addRenderer(primaryVideoView);
     }
 
-    private void moveLocalVideoToThumbnailView() {
+    @Override
+    public void moveLocalVideoToThumbnailView() {
         if (thumbnailVideoView.getVisibility() == View.GONE) {
             thumbnailVideoView.setVisibility(View.VISIBLE);
             localVideoTrack.removeRenderer(primaryVideoView);
@@ -593,7 +598,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
     /*
      * Called when participant leaves the room
      */
-    private void removeParticipant(Participant participant) {
+    @Override
+    public void removeParticipant(Participant participant) {
         videoStatusTextView.setText("Participant "+participant.getIdentity()+ " left.");
 //        if (!participant.getIdentity().equals(participantIdentity)) {
 //            return;
@@ -629,7 +635,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 //        moveLocalVideoToPrimaryView();
     }
 
-    private void removeParticipantVideo(VideoTrack videoTrack) {
+    @Override
+    public void removeParticipantVideo(VideoTrack videoTrack) {
 
         int temp = 0;
 
@@ -648,7 +655,25 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 //        videoTrack.removeRenderer(primaryVideoView);
     }
 
-    private void moveLocalVideoToPrimaryView() {
+    @Override
+    public void initializeRecyclerViewVideoView() {
+
+        videoViewTwilios = new ArrayList<>();
+        videoViewAdapter = new VideoViewAdapter(videoViewTwilios);
+        rcVideoView.setAdapter(videoViewAdapter);
+
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
+
+        rcVideoView.setLayoutManager(gridLayoutManager);
+
+        spacesItemDecoration = new SpacesItemDecoration(2);
+        rcVideoView.setHasFixedSize(true);
+        rcVideoView.addItemDecoration(spacesItemDecoration);
+
+    }
+
+    @Override
+    public void moveLocalVideoToPrimaryView() {
         if (thumbnailVideoView.getVisibility() == View.VISIBLE) {
             localVideoTrack.removeRenderer(thumbnailVideoView);
             thumbnailVideoView.setVisibility(View.GONE);
