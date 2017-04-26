@@ -42,6 +42,8 @@ public interface VideoCallingRoomContract {
 
         void updateStatusRequestVideoToken(boolean status, String message);
 
+        void adjustRecyclerView(int total);
+
     }
 
     interface Presenter extends BasePresenter<View> {

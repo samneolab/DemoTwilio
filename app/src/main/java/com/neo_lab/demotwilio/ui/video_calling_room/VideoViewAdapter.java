@@ -5,9 +5,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import com.neo_lab.demotwilio.R;
 import com.neo_lab.demotwilio.ui.video_calling_room.domain.model.VideoViewTwilio;
+import com.neo_lab.demotwilio.utils.screen.ScreenUtils;
 import com.twilio.video.VideoView;
 
 import java.util.List;
@@ -18,10 +20,17 @@ import java.util.List;
 
 public class VideoViewAdapter extends RecyclerView.Adapter<VideoViewAdapter.ViewHolder> {
 
+    private Context context;
+
     private List<VideoViewTwilio> videoViewTwilios;
 
-    public VideoViewAdapter(List<VideoViewTwilio> videoViewTwilios) {
+    private final int height;
+
+    public VideoViewAdapter(List<VideoViewTwilio> videoViewTwilios, Context context) {
         this.videoViewTwilios = videoViewTwilios;
+        this.context = context;
+
+        height = ScreenUtils.getScreenHeight(context);
     }
 
     @Override
@@ -44,6 +53,46 @@ public class VideoViewAdapter extends RecyclerView.Adapter<VideoViewAdapter.View
         holder.videoView.setMirror(false);
         videoViewTwilio.getVideoTrack().addRenderer(holder.videoView);
 
+        switch (videoViewTwilios.size()) {
+            case 1:
+                holder.relativeLayout.getLayoutParams().height = height;
+                break;
+            case 2:
+                holder.relativeLayout.getLayoutParams().height = height / 2;
+                break;
+            case 3:
+                holder.relativeLayout.getLayoutParams().height = height / 3;
+                break;
+            case 4:
+                holder.relativeLayout.getLayoutParams().height = height / 2;
+                break;
+            case 5:
+                holder.relativeLayout.getLayoutParams().height = height / 3;
+                break;
+            case 6:
+                holder.relativeLayout.getLayoutParams().height = height / 3;
+                break;
+            case 7:
+                holder.relativeLayout.getLayoutParams().height = height / 4;
+                break;
+            case 8:
+                holder.relativeLayout.getLayoutParams().height = height / 4;
+                break;
+            case 9:
+                holder.relativeLayout.getLayoutParams().height = height / 5;
+                break;
+            case 10:
+                holder.relativeLayout.getLayoutParams().height = height / 5;
+                break;
+            default:
+                holder.relativeLayout.getLayoutParams().height = height / 8;
+                break;
+        }
+
+        holder.relativeLayout.requestLayout();
+
+
+
     }
 
     @Override
@@ -56,14 +105,16 @@ public class VideoViewAdapter extends RecyclerView.Adapter<VideoViewAdapter.View
         // for any view that will be set as you render a row
         public VideoView videoView;
 
+        public RelativeLayout relativeLayout;
+
         // We also create a constructor that accepts the entire item row
         // and does the view lookups to find each subview
         public ViewHolder(View itemView) {
             // Stores the itemView in a public final member variable that can be used
             // to access the context from any ViewHolder instance.
             super(itemView);
-
             videoView = (VideoView) itemView.findViewById(R.id.video_view);
+            relativeLayout = (RelativeLayout) itemView.findViewById(R.id.rl_main);
         }
     }
 }

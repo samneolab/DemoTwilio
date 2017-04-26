@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -111,6 +112,10 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
     private VideoViewAdapter videoViewAdapter;
 
     private SpacesItemDecoration spacesItemDecoration;
+
+    private GridLayoutManager gridLayoutManager;
+
+    private LinearLayoutManager linearLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -217,25 +222,13 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
         userName = SharedPreferencesManager.getInstance(VideoCallingRoomActivity.this).getString(Key.USER_NAME);
-        
+
         roomNumber = SharedPreferencesManager.getInstance(VideoCallingRoomActivity.this).getString(Key.ROOM_NUMBER);
 
     }
 
     @Override
     public void showUI() {
-
-        videoViewTwilios = new ArrayList<>();
-        videoViewAdapter = new VideoViewAdapter(videoViewTwilios);
-        rcVideoView.setAdapter(videoViewAdapter);
-
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
-
-        rcVideoView.setLayoutManager(gridLayoutManager);
-
-        spacesItemDecoration = new SpacesItemDecoration(2);
-        rcVideoView.setHasFixedSize(true);
-        rcVideoView.addItemDecoration(spacesItemDecoration);
 
     }
 
@@ -311,12 +304,17 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
             @Override
             public void onConnected(Room room) {
                 videoStatusTextView.setText("Connected to the room number " + room.getName() + "\nThere is only you in this room\nPlease wait for another participant");
-                setTitle(room.getName());
 
-                Log.e(TAG, room.getParticipants().size() + "");
-
+                List<Participant> participants = new ArrayList<>();
                 for (Map.Entry<String, Participant> entry : room.getParticipants().entrySet()) {
-                    addParticipant(entry.getValue());
+
+                    participants.add(entry.getValue());
+
+//                    addParticipant(entry.getValue());
+                }
+
+                if (!participants.isEmpty()) {
+                    addParticipantsVideos(participants);
                 }
             }
 
@@ -567,6 +565,37 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         participant.getMedia().setListener(mediaListener(participant));
     }
 
+    public void addParticipantsVideos(List<Participant> participants) {
+
+        moveLocalVideoToThumbnailView();
+
+        for (Participant participant : participants) {
+            if (participant.getMedia().getVideoTracks().size() > 0) {
+                videoViewTwilios.add(new VideoViewTwilio(participant.getMedia().getVideoTracks().get(0), participant));
+            }
+
+            participant.getMedia().setListener(mediaListener(participant));
+        }
+
+        switch (videoViewTwilios.size()) {
+            case 1:
+                rcVideoView.setLayoutManager(linearLayoutManager);
+                break;
+            case 2:
+                rcVideoView.setLayoutManager(linearLayoutManager);
+                break;
+            case 3:
+                rcVideoView.setLayoutManager(linearLayoutManager);
+                break;
+            default:
+                rcVideoView.setLayoutManager(gridLayoutManager);
+                break;
+        }
+        videoViewAdapter.notifyDataSetChanged();
+
+    }
+
+
     /*
      * Set primary view as renderer for participant video track
      */
@@ -577,9 +606,21 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
         videoViewTwilios.add(new VideoViewTwilio(videoTrack, participant));
 
-        videoViewAdapter.notifyItemInserted(videoViewTwilios.size() - 1);
-//        primaryVideoView.setMirror(false);
-//        videoTrack.addRenderer(primaryVideoView);
+        switch (videoViewTwilios.size()) {
+            case 1:
+                rcVideoView.setLayoutManager(linearLayoutManager);
+                break;
+            case 2:
+                rcVideoView.setLayoutManager(linearLayoutManager);
+                break;
+            case 3:
+                rcVideoView.setLayoutManager(linearLayoutManager);
+                break;
+            default:
+                rcVideoView.setLayoutManager(gridLayoutManager);
+                break;
+        }
+        videoViewAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -600,39 +641,43 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
      */
     @Override
     public void removeParticipant(Participant participant) {
-        videoStatusTextView.setText("Participant "+participant.getIdentity()+ " left.");
-//        if (!participant.getIdentity().equals(participantIdentity)) {
-//            return;
-//        }
 
-        /*
-         * Remove participant renderer
-         */
+        videoStatusTextView.setText("Participant "+participant.getIdentity()+ " left.");
 
         int temp = 0;
 
         for (int index = 0; index < videoViewTwilios.size(); index++) {
             if (videoViewTwilios.get(index).getParticipant().getSid().equals(participant.getSid())) {
                 temp = index;
-                Log.e(TAG, temp + "");
                 break;
             }
 
         }
 
         videoViewTwilios.remove(temp);
-        videoViewAdapter.notifyItemRemoved(temp);
 
+        switch (videoViewTwilios.size()) {
+            case 1:
+                rcVideoView.setLayoutManager(linearLayoutManager);
+                break;
+            case 2:
+                rcVideoView.setLayoutManager(linearLayoutManager);
+                break;
+            case 3:
+                rcVideoView.setLayoutManager(linearLayoutManager);
+                break;
+            default:
+                rcVideoView.setLayoutManager(gridLayoutManager);
+                break;
+        }
 
-
-//        if (participant.getMedia().getVideoTracks().size() > 0) {
-//            Log.e(TAG, "removeParticipant");
-//            removeParticipantVideo(participant.getMedia().getVideoTracks().get(0));
-//        }
-
+        videoViewAdapter.notifyDataSetChanged();
 
         participant.getMedia().setListener(null);
-//        moveLocalVideoToPrimaryView();
+
+        if (videoViewTwilios.isEmpty())
+            moveLocalVideoToPrimaryView();
+
     }
 
     @Override
@@ -659,12 +704,13 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
     public void initializeRecyclerViewVideoView() {
 
         videoViewTwilios = new ArrayList<>();
-        videoViewAdapter = new VideoViewAdapter(videoViewTwilios);
+        videoViewAdapter = new VideoViewAdapter(videoViewTwilios, getActivity());
         rcVideoView.setAdapter(videoViewAdapter);
 
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
+        gridLayoutManager = new GridLayoutManager(this, 2);
+        linearLayoutManager = new LinearLayoutManager(this);
 
-        rcVideoView.setLayoutManager(gridLayoutManager);
+        rcVideoView.setLayoutManager(linearLayoutManager);
 
         spacesItemDecoration = new SpacesItemDecoration(2);
         rcVideoView.setHasFixedSize(true);
@@ -675,6 +721,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
     @Override
     public void moveLocalVideoToPrimaryView() {
         if (thumbnailVideoView.getVisibility() == View.VISIBLE) {
+            primaryVideoView.setVisibility(View.VISIBLE);
             localVideoTrack.removeRenderer(thumbnailVideoView);
             thumbnailVideoView.setVisibility(View.GONE);
             localVideoTrack.addRenderer(primaryVideoView);
@@ -701,6 +748,11 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
             videoStatusTextView.setText(message);
         }
 
+
+    }
+
+    @Override
+    public void adjustRecyclerView(int total) {
 
     }
 
