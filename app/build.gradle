@@ -73,4 +73,9 @@ dependencies {
     compile 'com.twilio:client-android:1.2.19'
 
     compile 'com.afollestad.material-dialogs:commons:0.9.4.3'
+
+    // Vlayout 
+    compile ('com.alibaba.android:vlayout:1.0.4@aar') {
+        transitive = true
+    }
 }
