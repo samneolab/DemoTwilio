@@ -306,15 +306,17 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
                 videoStatusTextView.setText("Connected to the room number " + room.getName() + "\nThere is only you in this room\nPlease wait for another participant");
 
                 List<Participant> participants = new ArrayList<>();
+
                 for (Map.Entry<String, Participant> entry : room.getParticipants().entrySet()) {
 
                     participants.add(entry.getValue());
 
-//                    addParticipant(entry.getValue());
                 }
 
                 if (!participants.isEmpty()) {
+
                     addParticipantsVideos(participants);
+
                 }
             }
 
@@ -571,7 +573,9 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
         for (Participant participant : participants) {
             if (participant.getMedia().getVideoTracks().size() > 0) {
+
                 videoViewTwilios.add(new VideoViewTwilio(participant.getMedia().getVideoTracks().get(0), participant));
+
             }
 
             participant.getMedia().setListener(mediaListener(participant));
@@ -696,8 +700,6 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
         videoViewTwilios.remove(temp);
         videoViewAdapter.notifyDataSetChanged();
-
-//        videoTrack.removeRenderer(primaryVideoView);
     }
 
     @Override
