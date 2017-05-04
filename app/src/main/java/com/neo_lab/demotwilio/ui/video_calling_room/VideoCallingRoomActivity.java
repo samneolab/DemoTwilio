@@ -117,6 +117,14 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
     private LinearLayoutManager linearLayoutManager;
 
+    private static String TEMP_TAG = "TEMP_TAG";
+
+    private int numberOfCurrentParticipants = 0;
+
+    private int numberOfCurrentParticipantsTemp = 0;
+
+    private boolean isFinishedInitializeParticipants = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -307,11 +315,14 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
                 List<Participant> participants = new ArrayList<>();
 
+
                 for (Map.Entry<String, Participant> entry : room.getParticipants().entrySet()) {
 
                     participants.add(entry.getValue());
 
                 }
+
+                numberOfCurrentParticipants = participants.size();
 
                 if (!participants.isEmpty()) {
 
@@ -339,6 +350,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
             @Override
             public void onParticipantConnected(Room room, Participant participant) {
+                Log.e(TEMP_TAG, "onParticipantConnected");
                 addParticipant(participant);
             }
 
@@ -376,8 +388,11 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
             @Override
             public void onAudioTrackAdded(Media media, AudioTrack audioTrack) {
+
                 videoStatusTextView.setText("onAudioTrackAdded");
+
                 videoStatusTextView.setText("You are in the room number " + roomNumber);
+
             }
 
             @Override
@@ -387,15 +402,23 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
             @Override
             public void onVideoTrackAdded(Media media, VideoTrack videoTrack) {
+
+                numberOfCurrentParticipantsTemp ++;
+
                 videoStatusTextView.setText("onVideoTrackAdded");
+
                 Log.e(TAG, "onVideoTrackAdded");
+
                 addParticipantVideo(videoTrack, participant);
             }
 
             @Override
             public void onVideoTrackRemoved(Media media, VideoTrack videoTrack) {
+
                 videoStatusTextView.setText("onVideoTrackRemoved");
+
                 removeParticipantVideo(videoTrack);
+
             }
 
             @Override
@@ -574,6 +597,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         for (Participant participant : participants) {
             if (participant.getMedia().getVideoTracks().size() > 0) {
 
+                Log.e(TEMP_TAG, TEMP_TAG);
+
                 videoViewTwilios.add(new VideoViewTwilio(participant.getMedia().getVideoTracks().get(0), participant));
 
             }
@@ -624,7 +649,20 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
                 rcVideoView.setLayoutManager(gridLayoutManager);
                 break;
         }
-        videoViewAdapter.notifyDataSetChanged();
+
+        if (numberOfCurrentParticipantsTemp == numberOfCurrentParticipants) {
+            videoViewAdapter.notifyDataSetChanged();
+
+            isFinishedInitializeParticipants = true;
+        } else {
+
+            if (isFinishedInitializeParticipants)
+                videoViewAdapter.notifyDataSetChanged();
+
+        }
+
+
+
     }
 
     @Override
