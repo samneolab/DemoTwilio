@@ -8,6 +8,12 @@
     android:keepScreenOn="true"
     tools:showIn="@layout/activity_video_calling_room">
 
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rc_video_view"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <com.twilio.video.VideoView
         android:id="@+id/primary_video_view"
         android:layout_width="match_parent"

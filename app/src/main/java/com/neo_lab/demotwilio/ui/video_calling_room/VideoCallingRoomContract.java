@@ -20,6 +20,8 @@ public interface VideoCallingRoomContract {
 
         void updateStatusRequestVideoToken(boolean status, String message);
 
+        void initializeVlayout();
+
     }
 
     interface Presenter extends BasePresenter<View> {

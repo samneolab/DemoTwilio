@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -15,11 +16,15 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.alibaba.android.vlayout.DelegateAdapter;
+import com.alibaba.android.vlayout.VirtualLayoutManager;
+import com.alibaba.android.vlayout.layout.LinearLayoutHelper;
 import com.neo_lab.demotwilio.R;
 import com.neo_lab.demotwilio.model.Token;
 import com.neo_lab.demotwilio.share_preferences_manager.Key;
 import com.neo_lab.demotwilio.share_preferences_manager.SharedPreferencesManager;
 import com.neo_lab.demotwilio.ui.base.BaseActivity;
+import com.neo_lab.demotwilio.ui.video_calling_room.domain.adapter.TwilioVideoViewAdapter;
 import com.neo_lab.demotwilio.ui.video_calling_room.domain.usecase.GetToken;
 import com.neo_lab.demotwilio.use_case.UseCaseHandler;
 import com.twilio.video.AudioTrack;
@@ -38,6 +43,8 @@ import com.twilio.video.VideoRenderer;
 import com.twilio.video.VideoTrack;
 import com.twilio.video.VideoView;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -99,6 +106,20 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
     private static String TEMP_TAG = "TEMP_TAG";
 
+    // Vlayout
+
+    private VirtualLayoutManager virtualLayoutManager;
+
+    private RecyclerView.RecycledViewPool viewPool;
+
+    private DelegateAdapter delegateAdapter;
+
+    private List<DelegateAdapter.Adapter> adapters;
+
+    @BindView(R.id.rc_video_view) RecyclerView rcVideoView;
+
+    private int totalRomoteUsers = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,6 +135,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         getLocalProperties();
 
         initializeCallingVideoRoom();
+
+        initializeVlayout();
 
     }
 
@@ -295,14 +318,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
                         break;
                     default:
                         for (Map.Entry<String, Participant> entry : room.getParticipants().entrySet()) {
-//                            addParticipant(entry.getValue());
-//                            break;
 
                             entry.getValue().getMedia().setListener(mediaListener());
-
-                            if (entry.getValue().getMedia().getVideoTracks().size() > 0) {
-                                Log.e(TEMP_TAG, "Bigger Than 0");
-                            }
 
                         }
 
@@ -365,20 +382,55 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
             @Override
             public void onAudioTrackAdded(Media media, AudioTrack audioTrack) {
+
                 videoStatusTextView.setText("onAudioTrackAdded");
+
                 videoStatusTextView.setText("You are in the room number " + roomNumber);
             }
 
             @Override
             public void onAudioTrackRemoved(Media media, AudioTrack audioTrack) {
+
                 videoStatusTextView.setText("onAudioTrackRemoved");
+
             }
 
             @Override
             public void onVideoTrackAdded(Media media, VideoTrack videoTrack) {
+
+                if (primaryVideoView.getVisibility() == View.VISIBLE) {
+                    localVideoTrack.removeRenderer(primaryVideoView);
+                    primaryVideoView.setVisibility(View.GONE);
+                }
+
+                if (rcVideoView.getVisibility() == View.GONE)
+                    rcVideoView.setVisibility(View.VISIBLE);
+
                 videoStatusTextView.setText("onVideoTrackAdded");
+
                 Log.e(TEMP_TAG, "onVideoTrackAdded");
-                addParticipantVideo(videoTrack);
+
+                List<VideoTrack> videoTracksTemp = new ArrayList<>();
+                videoTracksTemp.add(videoTrack);
+                adapters.add(new TwilioVideoViewAdapter(VideoCallingRoomActivity.this, new LinearLayoutHelper(), videoTracksTemp));
+
+
+
+                totalRomoteUsers ++;
+
+                if (totalRomoteUsers == 2) {
+
+                    delegateAdapter = new DelegateAdapter(virtualLayoutManager, true);
+
+                    Log.e(TEMP_TAG, "Adapter Size " + adapters.size());
+
+                    rcVideoView.setAdapter(delegateAdapter);
+
+                    delegateAdapter.setAdapters(adapters);
+                }
+
+
+//                addParticipantVideo(videoTrack);
             }
 
             @Override
@@ -408,6 +460,24 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
             }
         };
     }
+
+    @Override
+    public void initializeVlayout() {
+
+        virtualLayoutManager = new VirtualLayoutManager(this);
+
+        rcVideoView.setLayoutManager(virtualLayoutManager);
+
+        viewPool = new RecyclerView.RecycledViewPool();
+
+        rcVideoView.setRecycledViewPool(viewPool);
+
+        viewPool.setMaxRecycledViews(0, 20);
+
+        adapters = new ArrayList<>();
+
+    }
+
 
 
     private void connectToVideoRoom(String roomName, String accessToken) {
@@ -630,6 +700,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
 
     }
+
 
     @Override
     public BaseActivity getActivity() {
