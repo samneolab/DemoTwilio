@@ -53,7 +53,7 @@ import butterknife.ButterKnife;
 
 public class VideoCallingRoomActivity extends BaseActivity implements VideoCallingRoomContract.View {
 
-    private static final String TAG = "VideoCallingRoomActivity";
+    private static final String TAG = "TAG";
 
     private VideoCallingRoomContract.Presenter presenter;
 
@@ -328,6 +328,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
                     addParticipantsVideos(participants);
 
+                } else {
+                    isFinishedInitializeParticipants = true;
                 }
             }
 
@@ -416,8 +418,6 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
             public void onVideoTrackRemoved(Media media, VideoTrack videoTrack) {
 
                 videoStatusTextView.setText("onVideoTrackRemoved");
-
-                removeParticipantVideo(videoTrack);
 
             }
 
@@ -606,21 +606,21 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
             participant.getMedia().setListener(mediaListener(participant));
         }
 
-        switch (videoViewTwilios.size()) {
-            case 1:
-                rcVideoView.setLayoutManager(linearLayoutManager);
-                break;
-            case 2:
-                rcVideoView.setLayoutManager(linearLayoutManager);
-                break;
-            case 3:
-                rcVideoView.setLayoutManager(linearLayoutManager);
-                break;
-            default:
-                rcVideoView.setLayoutManager(gridLayoutManager);
-                break;
-        }
-        videoViewAdapter.notifyDataSetChanged();
+//        switch (videoViewTwilios.size()) {
+//            case 1:
+//                rcVideoView.setLayoutManager(linearLayoutManager);
+//                break;
+//            case 2:
+//                rcVideoView.setLayoutManager(linearLayoutManager);
+//                break;
+//            case 3:
+//                rcVideoView.setLayoutManager(linearLayoutManager);
+//                break;
+//            default:
+//                rcVideoView.setLayoutManager(gridLayoutManager);
+//                break;
+//        }
+//        videoViewAdapter.notifyDataSetChanged();
 
     }
 
@@ -650,18 +650,18 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
                 break;
         }
 
-        if (numberOfCurrentParticipantsTemp == numberOfCurrentParticipants) {
+        if (numberOfCurrentParticipantsTemp == numberOfCurrentParticipants && !isFinishedInitializeParticipants) {
+
             videoViewAdapter.notifyDataSetChanged();
 
             isFinishedInitializeParticipants = true;
+
         } else {
 
             if (isFinishedInitializeParticipants)
                 videoViewAdapter.notifyDataSetChanged();
 
         }
-
-
 
     }
 
@@ -684,7 +684,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
     @Override
     public void removeParticipant(Participant participant) {
 
-        videoStatusTextView.setText("Participant "+participant.getIdentity()+ " left.");
+        videoStatusTextView.setText("Participant "+participant.getIdentity() + " left.");
 
         int temp = 0;
 
@@ -728,9 +728,10 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         int temp = 0;
 
         for (int index = 0; index < videoViewTwilios.size(); index++) {
+
             if (videoViewTwilios.get(index).getId().equals(videoTrack.getTrackId())) {
                 temp = index;
-                Log.e(TAG, temp + "");
+                Log.e(TAG, temp + "  temp");
                 break;
             }
 
