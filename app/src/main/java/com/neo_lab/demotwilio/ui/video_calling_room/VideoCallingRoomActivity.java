@@ -97,6 +97,8 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
 
     private boolean disconnectedFromOnDestroy;
 
+    private static String TEMP_TAG = "TEMP_TAG";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -283,10 +285,31 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
                 videoStatusTextView.setText("Connected to the room number " + room.getName() + "\nThere is only you in this room\nPlease wait for another participant");
                 setTitle(room.getName());
 
-                for (Map.Entry<String, Participant> entry : room.getParticipants().entrySet()) {
-                    addParticipant(entry.getValue());
-                    break;
+                switch (room.getParticipants().entrySet().size()) {
+                    case 1:
+                        for (Map.Entry<String, Participant> entry : room.getParticipants().entrySet()) {
+                            addParticipant(entry.getValue());
+                            break;
+
+                        }
+                        break;
+                    default:
+                        for (Map.Entry<String, Participant> entry : room.getParticipants().entrySet()) {
+//                            addParticipant(entry.getValue());
+//                            break;
+
+                            entry.getValue().getMedia().setListener(mediaListener());
+
+                            if (entry.getValue().getMedia().getVideoTracks().size() > 0) {
+                                Log.e(TEMP_TAG, "Bigger Than 0");
+                            }
+
+                        }
+
+                        break;
                 }
+
+
             }
 
             @Override
@@ -354,6 +377,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
             @Override
             public void onVideoTrackAdded(Media media, VideoTrack videoTrack) {
                 videoStatusTextView.setText("onVideoTrackAdded");
+                Log.e(TEMP_TAG, "onVideoTrackAdded");
                 addParticipantVideo(videoTrack);
             }
 
@@ -523,6 +547,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
          * Add participant renderer
          */
         if (participant.getMedia().getVideoTracks().size() > 0) {
+            Log.e(TEMP_TAG, "Add Participant Only One");
             addParticipantVideo(participant.getMedia().getVideoTracks().get(0));
         }
 
