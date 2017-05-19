@@ -30,7 +30,7 @@ public class VideoViewAdapter extends RecyclerView.Adapter<VideoViewAdapter.View
         this.videoViewTwilios = videoViewTwilios;
         this.context = context;
 
-        height = ScreenUtils.getScreenHeight(context);
+        height = ScreenUtils.getScreenHeight(context) - 100 ;
     }
 
     @Override
@@ -90,8 +90,6 @@ public class VideoViewAdapter extends RecyclerView.Adapter<VideoViewAdapter.View
         }
 
         holder.relativeLayout.requestLayout();
-
-
 
     }
 

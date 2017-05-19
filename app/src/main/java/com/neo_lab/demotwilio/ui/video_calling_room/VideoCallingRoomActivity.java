@@ -311,6 +311,7 @@ public class VideoCallingRoomActivity extends BaseActivity implements VideoCalli
         return new Room.Listener() {
             @Override
             public void onConnected(Room room) {
+
                 videoStatusTextView.setText("Connected to the room number " + room.getName() + "\nThere is only you in this room\nPlease wait for another participant");
 
                 List<Participant> participants = new ArrayList<>();
